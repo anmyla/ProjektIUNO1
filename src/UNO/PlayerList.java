@@ -39,9 +39,7 @@ public class PlayerList {
 
     @Override
     public String toString() {
-        return "PlayerList{" +
-                "playerlist=" + playerlist +
-                '}';
+        return "PlayerList: " + playerlist;
     }
 
 

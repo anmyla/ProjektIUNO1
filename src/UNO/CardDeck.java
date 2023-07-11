@@ -53,7 +53,7 @@ public class CardDeck {
 
     // Method Karten abziehen
     public Card dealCard() {
-        return cardDeck.remove(0);
+        return cardDeck.remove(cardDeck.size()-1);
     }
 
     public void distributeCards(PlayerList playerList, CardDeck cardDeck) {
@@ -65,6 +65,8 @@ public class CardDeck {
 
             }
             System.out.println(player);
+            player.printCardsInHand();
+            System.out.println();
         }
 
     }
@@ -76,8 +78,8 @@ public class CardDeck {
     public void add(Card card){
         cardDeck.add(card);
     }
+
+    public void remove(Card card) {
+        cardDeck.remove(card);
+    }
 }
-
-
-
-
