@@ -71,8 +71,15 @@ public class Player {
     public void takeCard(Card card){
         cardsInHand.add(card);
     }
-    //Methode Karten nehmen
+   protected boolean saidUno;
 
+    public boolean isSaidUno() {
+        return saidUno;
+    }
+
+    public void setSaidUno(boolean saidUno) {
+        this.saidUno = saidUno;
+    }
 
     public Card getCardByID(int eingabe) {
         Card result = null;

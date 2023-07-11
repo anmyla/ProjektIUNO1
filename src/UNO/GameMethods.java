@@ -665,4 +665,23 @@ public class GameMethods {
         }
     }
 
+    public boolean sayUno(){
+        boolean UNO = false;
+        if(currentPlayer.cardsInHand.size()==1){
+
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("You have only one card left in your hand! Tres, dos, ...");
+            String string = scanner.next().toLowerCase();
+            if(string.equals("uno")){
+                UNO = true;
+            }
+            else if (!string.equals("uno") || string == null){
+                System.out.println("Oops, now you have to draw a penalty card!");
+                currentPlayer.cardsInHand.add(cardDeck.dealCard());
+                currentPlayer.printCardsInHand();
+            }
+        }
+        getCurrentPlayer().setSaidUno(UNO);
+        return UNO;
+    }
 }

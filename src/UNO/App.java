@@ -43,6 +43,7 @@ public class App {
         if(getCurrentPlayer().getPlayedCard() != null) { // if the current player made a "move"
             gameMethods.chosenCardValidityCheck(); // her "move" will be checked
             acceptPlayersInput(); // if her "move" is valid, it will be taken out of her hand and placed on to the discard pile.
+            gameMethods.sayUno();
         }
         else {
             setBlocked(false); //in case the currentPlayer could not make a move, block is set to default so next player can play.
