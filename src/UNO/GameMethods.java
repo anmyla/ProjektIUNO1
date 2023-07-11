@@ -103,14 +103,12 @@ public class GameMethods {
         int initialPlayerIndex = rand.nextInt(3);
         setCurrentPlayerIndex(initialPlayerIndex);
         setCurrentPlayer(getPlayerByIndex(initialPlayerIndex));
-        //   setPreviousPayer(plisReverseCard());
+        //   setPreviousPayer(isReverseCard());
         System.out.println(getPlayerByIndex(currentPlayerIndex).getName() + ",you start the game. ");
     }
 
     public void putFirstCardOnTable() {
-        // todo: Regeln implementieren, falls erste Karte eine plus4, colorchange, reverse, oder pass card ist
-        //Wenn eine Farbenwahl Karte zu Beginn des Spiels gezogen wird, entscheidet der Spieler zur Linken
-        //des Gebers, welche Farbe als nächstes gelegt werden soll
+
         Card firstCard = cardDeck.dealCard();
         discardPile.addCardIn(0, firstCard);
     }
@@ -139,7 +137,7 @@ public class GameMethods {
         Card card = discardPile.showLastCard();
 
         if (card.getType().equals(Type.PLUS_4) && !isPenaltyGiven()) {
-            System.out.println(getCurrentPlayer().getName() + ", you get 4 penalty cards and you are block from playing this turn.");
+            System.out.println(getCurrentPlayer().getName() + ", you get 4 penalty cards and you are blocked from playing this turn.");
             plus4Card();
             currentPlayer.printCardsInHand();
             setPenaltyGiven(true); //this is to tell the program that the penalty has been "claimed"
@@ -147,7 +145,7 @@ public class GameMethods {
             setPreviousPlayer(getPlayerByIndex(currentPlayerIndex));
         } else if ((card.getType().equals(Type.RED_PLUS2) || card.getType().equals(Type.YELLOW_PLUS2)
                 || card.getType().equals(Type.GREEN_PLUS2) || card.getType().equals(Type.BLUE_PLUS2)) && !isPenaltyGiven()) {
-            System.out.println(getCurrentPlayer().getName() + ", you get 2 penalty cards and you are block form playing this turn.");
+            System.out.println(getCurrentPlayer().getName() + ", you get 2 penalty cards and you are blocked form playing this turn.");
             plus2Card();
             currentPlayer.printCardsInHand();
             setPenaltyGiven(true);
@@ -683,5 +681,14 @@ public class GameMethods {
         }
         getCurrentPlayer().setSaidUno(UNO);
         return UNO;
+    }
+    public boolean winnerOftheRound(){ // to check if there is a winner of the round, so the current round is over.
+        boolean noMoreCardsInHand = false;
+        if(currentPlayer.cardsInHand.size() == 0){
+            System.out.println(currentPlayer.getName() + ", you win this round!");
+            noMoreCardsInHand = true;
+        }
+        getCurrentPlayer().setWinnerOftheRound(noMoreCardsInHand);
+        return noMoreCardsInHand;
     }
 }

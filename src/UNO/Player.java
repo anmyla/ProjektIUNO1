@@ -11,6 +11,10 @@ public class Player {
     protected static int counter = 0;
     protected ArrayList<Card> cardsInHand = new ArrayList<>();
 
+    protected boolean saidUno;
+
+    protected boolean winnerOftheRound;
+
     public void setPlayedCard(Card playedCard) {
         this.playedCard = playedCard;
     }
@@ -71,14 +75,23 @@ public class Player {
     public void takeCard(Card card){
         cardsInHand.add(card);
     }
-   protected boolean saidUno;
+
 
     public boolean isSaidUno() {
         return saidUno;
     }
 
+
     public void setSaidUno(boolean saidUno) {
         this.saidUno = saidUno;
+    }
+
+    public boolean isWinnerOftheRound() {
+        return winnerOftheRound;
+    }
+
+    public void setWinnerOftheRound(boolean winnerOftheRound) {
+        this.winnerOftheRound = winnerOftheRound;
     }
 
     public Card getCardByID(int eingabe) {
