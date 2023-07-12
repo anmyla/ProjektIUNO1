@@ -3,11 +3,13 @@ package UNO;
 import java.util.Random;
 import java.util.Scanner;
 
+import static UNO.Bot.botPlaysCard;
+
 
 public class GameMethods {
 
     private static CardDeck cardDeck = new CardDeck();
-    private static DiscardPile discardPile = new DiscardPile();
+    static DiscardPile discardPile = new DiscardPile();
     private static PlayerList playerList = new PlayerList();
     private static boolean penaltyGiven; //NEW
     public static String color;
@@ -85,7 +87,7 @@ public class GameMethods {
         cardDeck.createCards(Type.GREEN);
         cardDeck.createActionCards();
         cardDeck.shuffleCards();
-        playerList.addPlayer();
+        setPlayersForTheRound();
         System.out.println();
         cardDeck.distributeCards(playerList, cardDeck);
         setBlocked(false);
@@ -119,8 +121,15 @@ public class GameMethods {
         try {
             if (playedCard.getType().equals(Type.PLUS_4) || playedCard.getType().equals(Type.COLORCHANGE)) {
                 System.out.println(currentPlayer.getName() + " please choose a color: ");
-                Scanner input = new Scanner(System.in);
-                String color = input.nextLine();
+                if (currentPlayer instanceof Bot) { //random color will be generated if player is Bot
+                    Random random = new Random();
+                    String[] colors = {"RED", "YELLOW", "BLUE", "GREEN"}; //String array of colors we can use to generate a random color
+                    String color = (colors[random.nextInt(colors.length)]);
+                    System.out.println(color);
+                } else { // color will be entered if player in human
+                    Scanner input = new Scanner(System.in);
+                    String color = input.nextLine();
+                }
                 setColor(color);
             }
         } catch (
@@ -184,7 +193,7 @@ public class GameMethods {
         Card card = currentPlayer.getPlayedCard();
         Card discard = discardPile.showLastCard();
 
-        if(card.getType().equals(Type.COLORCHANGE) || card.getType().equals(Type.PLUS_4)) {
+        if (card.getType().equals(Type.COLORCHANGE) || card.getType().equals(Type.PLUS_4)) {
             chosenCardValid = true;
         } else if (discard.getType().equals(Type.COLORCHANGE) || discard.getType().equals(Type.PLUS_4)) {
             if (card.getType().name().charAt(0) == getColor().charAt(0)) {
@@ -325,9 +334,14 @@ public class GameMethods {
                     System.out.println(currentPlayer);
                     currentPlayer.printCardsInHand();
                     System.out.println(currentPlayer.getName() + " , your move! Type in the ID of the card you would like to play: ");
-                    int intCardID = input.nextInt();
-                    Card cardToPlay = currentPlayer.getCardByID(intCardID);
-                    currentPlayer.setPlayedCard(cardToPlay);
+                    if (currentPlayer instanceof Bot) {
+                        Card cardToPlay = botPlaysCard();
+                        currentPlayer.setPlayedCard(cardToPlay);
+                    } else {
+                        int intCardID = input.nextInt();
+                        Card cardToPlay = currentPlayer.getCardByID(intCardID);
+                        currentPlayer.setPlayedCard(cardToPlay);
+                    }
                     colorChangeCard();
                 } else {
                     System.out.println("Sorry, " + currentPlayer.getName() + ", you don't have a valid card to play. Please draw a card.");
@@ -337,9 +351,14 @@ public class GameMethods {
                     if (hasValidCardToPlay()) {
                         // remove card from hand, add to card to discard pile = play this card
                         System.out.println(currentPlayer.getName() + " , your move! Type in the ID of the card you would like to play");
-                        int intCardID = input.nextInt();
-                        Card cardToPlay = currentPlayer.getCardByID(intCardID);
-                        currentPlayer.setPlayedCard(cardToPlay);
+                        if (currentPlayer instanceof Bot) {
+                            Card cardToPlay = botPlaysCard();
+                            currentPlayer.setPlayedCard(cardToPlay);
+                        } else {
+                            int intCardID = input.nextInt();
+                            Card cardToPlay = currentPlayer.getCardByID(intCardID);
+                            currentPlayer.setPlayedCard(cardToPlay);
+                        }
                         colorChangeCard();
                     } else {
                         System.out.println("Sorry, " + currentPlayer.getName() + " you STILL don't have a card to play out this turn.");
@@ -349,6 +368,44 @@ public class GameMethods {
         }
     }
 
+    /*
+        public void playerPlaysCard() {
+            Player currentPlayer = getCurrentPlayer();
+            Scanner input = new Scanner(System.in);
+
+            if (discardPile.getDiscardPile().size() == 1) {
+                initialPlayerPlaysCard();
+            } else {
+                checkIfCurrentPlayerMustBePenalized(); //before a player makes a move, it will be check if the player must receive a penalty.
+                if (!isBlocked()) {
+                    if (hasValidCardToPlay()) {
+                        System.out.println(currentPlayer);
+                        currentPlayer.printCardsInHand();
+                        System.out.println(currentPlayer.getName() + " , your move! Type in the ID of the card you would like to play: ");
+                        int intCardID = input.nextInt();
+                        Card cardToPlay = currentPlayer.getCardByID(intCardID);
+                        currentPlayer.setPlayedCard(cardToPlay);
+                        colorChangeCard();
+                    } else {
+                        System.out.println("Sorry, " + currentPlayer.getName() + ", you don't have a valid card to play. Please draw a card.");
+                        //current player nimmt eine Karte vom Deck und fügt sie seinen Karten hinzu
+                        currentPlayer.cardsInHand.add(cardDeck.dealCard());
+                        currentPlayer.printCardsInHand();
+                        if (hasValidCardToPlay()) {
+                            // remove card from hand, add to card to discard pile = play this card
+                            System.out.println(currentPlayer.getName() + " , your move! Type in the ID of the card you would like to play");
+                            int intCardID = input.nextInt();
+                            Card cardToPlay = currentPlayer.getCardByID(intCardID);
+                            currentPlayer.setPlayedCard(cardToPlay);
+                            colorChangeCard();
+                        } else {
+                            System.out.println("Sorry, " + currentPlayer.getName() + " you STILL don't have a card to play out this turn.");
+                        }
+                    }
+                }
+            }
+        }
+    */
     public static Player getPlayerByIndex(int playerIndex) {
         Player result;
         result = playerList.getPlayerlist().get(playerIndex);
@@ -418,9 +475,14 @@ public class GameMethods {
             if (hasValidCardToPlay() && !isBlocked()) {
                 currentPlayer.printCardsInHand();
                 System.out.println(currentPlayer.getName() + " ,your move! Type in the ID of the card you would like to play");
-                int intCardID = input.nextInt();
-                cardToPlay = currentPlayer.getCardByID(intCardID);
-                currentPlayer.setPlayedCard(cardToPlay);
+                if (currentPlayer instanceof Bot) {
+                    cardToPlay = botPlaysCard();
+                    currentPlayer.setPlayedCard(cardToPlay);
+                } else {
+                    int intCardID = input.nextInt();
+                    cardToPlay = currentPlayer.getCardByID(intCardID);
+                    currentPlayer.setPlayedCard(cardToPlay);
+                }
                 colorChangeCard(); //to handle COLORCHANGE cards in case player used it
             } else {
                 System.out.println("Sorry, " + currentPlayer.getName() + ", you don't have a valid card to play. Please draw a card.");
@@ -430,9 +492,14 @@ public class GameMethods {
                 if (hasValidCardToPlay()) {
                     // remove card from hand, add to card to discard pile = play this card
                     System.out.println(currentPlayer.getName() + " ,your move! Type in the ID of the card you would like to play");
-                    int intCardID = input.nextInt();
-                    cardToPlay = currentPlayer.getCardByID(intCardID);
-                    currentPlayer.setPlayedCard(cardToPlay);
+                    if (currentPlayer instanceof Bot) {
+                        cardToPlay = botPlaysCard();
+                        currentPlayer.setPlayedCard(cardToPlay);
+                    } else {
+                        int intCardID = input.nextInt();
+                        cardToPlay = currentPlayer.getCardByID(intCardID);
+                        currentPlayer.setPlayedCard(cardToPlay);
+                    }
                     colorChangeCard();
                 } else {
                     System.out.println("Sorry, " + currentPlayer.getName() + " you don't have a card to play out this turn.");
@@ -478,7 +545,7 @@ public class GameMethods {
         return samecolor;
     }
 
-    public boolean isSameColorWithCardInHand() {
+    public static boolean isSameColorWithCardInHand() {
         Player currentPlayer = getCurrentPlayer();
         Card topcard = discardPile.showLastCard();
         boolean topCardIsSameColorWithCardInHand = false;
@@ -503,7 +570,7 @@ public class GameMethods {
         return topCardIsSameColorWithCardInHand;
     }
 
-    public boolean passCardCheck() {
+    public static boolean passCardCheck() {
         Player currentPlayer = getCurrentPlayer();
         Card c1 = currentPlayer.getPlayedCard();
         Card c2 = discardPile.showLastCard();
@@ -516,7 +583,7 @@ public class GameMethods {
         return botharepassCards;
     }
 
-    public boolean PassCardCheckCardInHand() {
+    public static boolean PassCardCheckCardInHand() {
         Player currentPlayer = getCurrentPlayer();
         Card topcard = discardPile.showLastCard();
         boolean botharepassCards = false;
@@ -534,7 +601,7 @@ public class GameMethods {
         return botharepassCards;
     }
 
-    public boolean plus2Check() {
+    public static boolean plus2Check() {
         Player currentPlayer = getCurrentPlayer();
         Card c1 = currentPlayer.getPlayedCard();
         Card c2 = discardPile.showLastCard();
@@ -548,7 +615,7 @@ public class GameMethods {
     }
 
 
-    public boolean plus2CheckCardInHand() {
+    public static boolean plus2CheckCardInHand() {
         Player currentPlayer = getCurrentPlayer();
         Card topcard = discardPile.showLastCard();
         boolean bothArePlus2Cards = false;
@@ -567,7 +634,7 @@ public class GameMethods {
     }
 
 
-    public boolean hasValidCardToPlay() {
+    public static boolean hasValidCardToPlay() {
         boolean isValid = false;
         Player currentPlayer = getCurrentPlayer();
         Card discard = getDiscardPile().showLastCard();
@@ -588,7 +655,7 @@ public class GameMethods {
                     isValid = false;
                 }
             } else {
-                if (discard.getType().equals(card.getType())  || card.getType().equals(Type.PLUS_4)
+                if (discard.getType().equals(card.getType()) || card.getType().equals(Type.PLUS_4)
                         || card.getType().equals(Type.COLORCHANGE) || card.getType().name().charAt(0) == discard.getType().name().charAt(0)
                         || isSameColorWithCardInHand() || PassCardCheckCardInHand() || plus2CheckCardInHand()) {
                     isValid = true;
@@ -663,17 +730,16 @@ public class GameMethods {
         }
     }
 
-    public boolean sayUno(){
+    public boolean sayUno() {
         boolean UNO = false;
-        if(currentPlayer.cardsInHand.size()==1){
+        if (currentPlayer.cardsInHand.size() == 1) {
 
             Scanner scanner = new Scanner(System.in);
             System.out.println("You have only one card left in your hand! Tres, dos, ...");
             String string = scanner.next().toLowerCase();
-            if(string.equals("uno")){
+            if (string.equals("uno")) {
                 UNO = true;
-            }
-            else if (!string.equals("uno") || string == null){
+            } else if (!string.equals("uno") || string == null) {
                 System.out.println("Oops, now you have to draw a penalty card!");
                 currentPlayer.cardsInHand.add(cardDeck.dealCard());
                 currentPlayer.printCardsInHand();
@@ -682,13 +748,92 @@ public class GameMethods {
         getCurrentPlayer().setSaidUno(UNO);
         return UNO;
     }
-    public boolean winnerOftheRound(){ // to check if there is a winner of the round, so the current round is over.
+
+    public boolean winnerOftheRound() { // to check if there is a winner of the round, so the current round is over.
         boolean noMoreCardsInHand = false;
-        if(currentPlayer.cardsInHand.size() == 0){
+        if (currentPlayer.cardsInHand.size() == 0) {
             System.out.println(currentPlayer.getName() + ", you win this round!");
             noMoreCardsInHand = true;
         }
         getCurrentPlayer().setWinnerOftheRound(noMoreCardsInHand);
         return noMoreCardsInHand;
     }
+
+    public static void botsPlayers(int bots) { //method to set up Bot players and add these to player's list
+        String[] botNames = {"BOT 1", "BOT 2", "BOT 3", "BOT 4"};
+        String name;
+        Random random = new Random();
+        for (int i = 0; i < bots; i++) {
+            boolean nameExists;
+            do {
+                int temp = random.nextInt(botNames.length); //generate random and "unique" name from the botNames[] array
+                name = botNames[temp];
+                nameExists = false;
+
+                for (Player player : playerList.getPlayerlist()) {
+                    if (player.getName().equals(name.toUpperCase())) {
+                        nameExists = true;
+                        break;
+                    }
+                }
+            } while (nameExists);
+            playerList.getPlayerlist().add(new Bot(name.toUpperCase()));
+            System.out.println(name + " is added.");
+        }
+    }
+
+    public static void humanPlayers(int humanPlayers) { //method to collect names for Human Players and add these to player's list
+        Scanner scanner = new Scanner(System.in);
+        for (int i = 0; i < humanPlayers; ) {
+            String name;
+            boolean nameExists;
+
+            do {
+                System.out.println("Please type in your name: ");
+                name = scanner.nextLine().toUpperCase();
+                nameExists = false;
+
+                for (Player player : playerList.getPlayerlist()) {
+                    if (player.getName().equals(name)) {
+                        nameExists = true;
+                        break;
+                    }
+                }
+
+                if (nameExists || name.isEmpty()) {
+                    System.out.println("This field cannot be empty and name must be unique!");
+                }
+            } while (nameExists || name.isEmpty());
+
+            playerList.add(new Human(name));
+            i++;
+        }
+    }
+
+    protected static void setPlayersForTheRound() { // set up players for the round (humans and bots)
+        Scanner input = new Scanner(System.in);
+        int answer = 0;
+        while (true) {
+            System.out.println("Enter the number of Bots that will be playing in this game (0-4): ");
+            answer = input.nextInt();
+            try {
+                if (answer >= 0 && answer <= 4) {
+                    break; // Valid input, exit the loop
+                } else {
+                    System.out.println("Invalid input! Please enter a number between 0 and 4."); //will be repeated desired input is entered
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input! Please enter a number between 0 and 4.");
+            }
+        }
+
+        if (answer > 0 && answer <= 4) {
+            botsPlayers(answer); //this is a method to set up bot players
+        } else {
+            System.out.println("OK, so there will be NO bots in this game!");
+        }
+        int numberOfHumanPlayers = 4 - answer; //answer will be the number of  human players
+        humanPlayers(numberOfHumanPlayers); // method to set up human players
+    }
 }
+

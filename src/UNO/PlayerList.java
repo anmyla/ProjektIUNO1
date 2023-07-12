@@ -11,7 +11,7 @@ import static UNO.GameMethods.setCurrentPlayer;
 public class PlayerList {
 
 
-    private ArrayList<Player> playerlist = new ArrayList<>();
+    protected static ArrayList<Player> playerlist = new ArrayList<>();
 
     public ArrayList<Player> getPlayerlist() {
         return playerlist;
@@ -40,6 +40,10 @@ public class PlayerList {
     @Override
     public String toString() {
         return "PlayerList: " + playerlist;
+    }
+
+    public void add(Player player) {
+        playerlist.add(player);
     }
 
 
