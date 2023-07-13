@@ -126,11 +126,12 @@ public class GameMethods {
                     String[] colors = {"RED", "YELLOW", "BLUE", "GREEN"}; //String array of colors we can use to generate a random color
                     String color = (colors[random.nextInt(colors.length)]);
                     System.out.println(color);
+                    setColor(color);
                 } else { // color will be entered if player in human
                     Scanner input = new Scanner(System.in);
                     String color = input.nextLine();
+                    setColor(color);
                 }
-                setColor(color);
             }
         } catch (
                 NullPointerException e) { //NPE can happen if current player has a valid card to play but inputs a card that she does not have in hand.
@@ -193,25 +194,21 @@ public class GameMethods {
         Card card = currentPlayer.getPlayedCard();
         Card discard = discardPile.showLastCard();
 
-        if (card.getType().equals(Type.COLORCHANGE) || card.getType().equals(Type.PLUS_4)) {
+        if (discard.getType().equals(card.getType()) || card.getType().equals(Type.PLUS_4)
+                || card.getType().equals(Type.COLORCHANGE) || card.getType().name().charAt(0) == discard.getType().name().charAt(0)
+                || (discard.getType().name().endsWith("PASS") && card.getType().name().endsWith("PASS"))
+                || (discard.getType().name().endsWith("2") && card.getType().name().endsWith("2"))
+                || (discard.getType().name().endsWith("REVERSE") && card.getType().name().endsWith("REVERSE"))) {
             chosenCardValid = true;
         } else if (discard.getType().equals(Type.COLORCHANGE) || discard.getType().equals(Type.PLUS_4)) {
             if (card.getType().name().charAt(0) == getColor().charAt(0)) {
                 chosenCardValid = true;
-            } else {
-                chosenCardValid = false;
             }
         } else if (discard.getType().equals(Type.GREEN) || discard.getType().equals(Type.YELLOW)
-                || discard.getType().equals(Type.RED) || discard.getType().equals(Type.YELLOW)) {
-            if (discard.getNumber() == card.getNumber() || discard.getType().name().charAt(0) == card.getType().name().charAt(0)) {
+                || discard.getType().equals(Type.RED) || discard.getType().equals(Type.BLUE)) {
+            if (discard.getNumber() == card.getNumber()) {
                 chosenCardValid = true;
-            } else {
-                chosenCardValid = false;
             }
-        } else if (discard.getType().equals(card.getType()) || card.getType().name().charAt(0) == discard.getType().name().charAt(0)
-                || card.getType().equals(Type.PLUS_4) || card.getType().equals(Type.COLORCHANGE)
-                || isSameColor() || passCardCheck() || plus2Check()) {
-            chosenCardValid = true;
         } else { //if player chose a card that is not valid based on what is on the top of discard deck
             chosenCardValid = false;
             System.out.println("Sorry, this is not a valid move. Now you have to draw a penalty card!");
@@ -516,12 +513,10 @@ public class GameMethods {
         System.out.println();
 
         System.out.print(specialFontColor + "DISCARD PILE: ");
-        if ((card.getType().equals(Type.COLORCHANGE) || card.getType().equals(Type.PLUS_4)) && !getColor().isEmpty()) { //if COLORCHANGE, the newColor must be printed too.
+        if ((card.getType().equals(Type.COLORCHANGE) || card.getType().equals(Type.PLUS_4))) { //if COLORCHANGE, the newColor must be printed too.
             System.out.print(card + " New Color: " + getColor());
-        } else if (!card.getType().equals("Color")) {
-            System.out.print(card);
         } else {
-            System.out.print(card + " New Color: " + getColor() + ",  " + card.getNumber());
+            System.out.print(card);
         }
         System.out.println(resetDefaultFontColor);
     }
@@ -570,6 +565,62 @@ public class GameMethods {
         return topCardIsSameColorWithCardInHand;
     }
 
+
+
+    public static boolean passCardCheck() {
+        Player currentPlayer = getCurrentPlayer();
+        Card c1 = currentPlayer.getPlayedCard();
+        Card c2 = discardPile.showLastCard();
+        boolean bothArePassCards = false;
+
+        if (c1.getType().name().endsWith("PASS") && c2.getType().name().endsWith("PASS")) {
+            bothArePassCards = true;
+        }
+
+        return bothArePassCards;
+    }
+
+    public static boolean plus2Check() {
+        Player currentPlayer = getCurrentPlayer();
+        Card c1 = currentPlayer.getPlayedCard();
+        Card c2 = discardPile.showLastCard();
+        boolean bothArePlus2Cards = false;
+
+        if (c1.getType().name().endsWith("2") && c2.getType().name().endsWith("2")) {
+            bothArePlus2Cards = true;
+        }
+        return bothArePlus2Cards;
+    }
+
+    public static boolean passCardCheckCardInHand() {
+        Player currentPlayer = getCurrentPlayer();
+        Card c2 = discardPile.showLastCard();
+        boolean bothArePassCards = false;
+
+        for (Card c1 : currentPlayer.getCardsInHand()) {
+            if (c1.getType().name().endsWith("PASS") && c2.getType().name().endsWith("PASS")) {
+                bothArePassCards = true;
+                break;
+            }
+        }
+        return bothArePassCards;
+    }
+
+    public static boolean plus2CheckCardInHand() {
+        Player currentPlayer = getCurrentPlayer();
+        Card c2 = discardPile.showLastCard();
+        boolean bothArePlus2Cards = false;
+
+        for (Card c1 : currentPlayer.getCardsInHand()) {
+            if (c1.getType().name().endsWith("2") && c2.getType().name().endsWith("2")) {
+                bothArePlus2Cards = true;
+            }
+        }
+        return bothArePlus2Cards;
+    }
+
+
+    /*
     public static boolean passCardCheck() {
         Player currentPlayer = getCurrentPlayer();
         Card c1 = currentPlayer.getPlayedCard();
@@ -582,7 +633,10 @@ public class GameMethods {
         }
         return botharepassCards;
     }
+     */
 
+
+    /*
     public static boolean PassCardCheckCardInHand() {
         Player currentPlayer = getCurrentPlayer();
         Card topcard = discardPile.showLastCard();
@@ -600,7 +654,10 @@ public class GameMethods {
         }
         return botharepassCards;
     }
+    */
 
+
+    /*
     public static boolean plus2Check() {
         Player currentPlayer = getCurrentPlayer();
         Card c1 = currentPlayer.getPlayedCard();
@@ -614,8 +671,10 @@ public class GameMethods {
         return botharepassCards;
     }
 
+     */
 
-    public static boolean plus2CheckCardInHand() {
+
+/*    public static boolean plus2CheckCardInHand() {
         Player currentPlayer = getCurrentPlayer();
         Card topcard = discardPile.showLastCard();
         boolean bothArePlus2Cards = false;
@@ -632,6 +691,7 @@ public class GameMethods {
         }
         return bothArePlus2Cards;
     }
+ */
 
 
     public static boolean hasValidCardToPlay() {
@@ -640,31 +700,24 @@ public class GameMethods {
         Card discard = getDiscardPile().showLastCard();
 
         for (Card card : currentPlayer.cardsInHand) {
-            if (getColor() != null) {
+            if (discard.getType().equals(card.getType()) || card.getType().equals(Type.PLUS_4)
+                    || card.getType().equals(Type.COLORCHANGE) || card.getType().name().charAt(0) == discard.getType().name().charAt(0)
+                    || (discard.getType().name().endsWith("PASS") && card.getType().name().endsWith("PASS"))
+                    || (discard.getType().name().endsWith("2") && card.getType().name().endsWith("2"))
+                    || (discard.getType().name().endsWith("REVERSE") && card.getType().name().endsWith("REVERSE"))) {
+                isValid = true;
+                break;
+            } else if (discard.getType().equals(Type.GREEN) || discard.getType().equals(Type.YELLOW)
+                    || discard.getType().equals(Type.RED) || discard.getType().equals(Type.BLUE)) {
+                if (discard.getNumber() == card.getNumber()) {
+                    isValid = true;
+                    break;
+                }
+            } else if (discard.getType().equals(Type.COLORCHANGE) || discard.getType().equals(Type.PLUS_4)) {
                 if (discard.getType().equals(card.getType()) || card.getType().name().charAt(0) == getColor().charAt(0)
                         || card.getType().equals(Type.PLUS_4) || card.getType().equals(Type.COLORCHANGE)) {
                     isValid = true;
                     break;
-                } else if (discard.getType().equals(Type.GREEN) || discard.getType().equals(Type.YELLOW)
-                        || discard.getType().equals(Type.RED) || discard.getType().equals(Type.YELLOW)) {
-                    if (discard.getNumber() == card.getNumber()) {
-                        isValid = true;
-                        break;
-                    }
-                } else {
-                    isValid = false;
-                }
-            } else {
-                if (discard.getType().equals(card.getType()) || card.getType().equals(Type.PLUS_4)
-                        || card.getType().equals(Type.COLORCHANGE) || card.getType().name().charAt(0) == discard.getType().name().charAt(0)
-                        || isSameColorWithCardInHand() || PassCardCheckCardInHand() || plus2CheckCardInHand()) {
-                    isValid = true;
-                } else if (discard.getType().equals(Type.GREEN) || discard.getType().equals(Type.YELLOW)
-                        || discard.getType().equals(Type.RED) || discard.getType().equals(Type.YELLOW)) {
-                    if (discard.getNumber() == card.getNumber()) {
-                        isValid = true;
-                        break;
-                    }
                 } else {
                     isValid = false;
                 }
@@ -723,20 +776,27 @@ public class GameMethods {
 
     public static void resetColorToDefault() {
         if (discardPile.getSizeofDiscardPile() > 1) {
-            if (discardPile.getDiscardPile().get(1).getType().equals(Type.COLORCHANGE)
-                    || discardPile.getDiscardPile().get(1).getType().equals(Type.PLUS_4)) {
+            if ((discardPile.getDiscardPile().get(1).getType().equals(Type.COLORCHANGE)
+                    || discardPile.getDiscardPile().get(1).getType().equals(Type.PLUS_4)) && (!discardPile.getDiscardPile().get(0).getType().equals(Type.COLORCHANGE)
+                    && !discardPile.getDiscardPile().get(0).getType().equals(Type.PLUS_4)) ) {
                 setColor(null);
             }
         }
     }
 
     public boolean sayUno() {
+        String string;
         boolean UNO = false;
         if (currentPlayer.cardsInHand.size() == 1) {
-
             Scanner scanner = new Scanner(System.in);
             System.out.println("You have only one card left in your hand! Tres, dos, ...");
-            String string = scanner.next().toLowerCase();
+            if (currentPlayer instanceof Human) {
+                string = scanner.next().toLowerCase();
+            }else {
+                string = "uno";
+                System.out.println("uno");
+            }
+
             if (string.equals("uno")) {
                 UNO = true;
             } else if (!string.equals("uno") || string == null) {
@@ -766,18 +826,18 @@ public class GameMethods {
         for (int i = 0; i < bots; i++) {
             boolean nameExists;
             do {
-                int temp = random.nextInt(botNames.length); //generate random and "unique" name from the botNames[] array
+                int temp = random.nextInt(botNames.length); //generate random name from the botNames[] array
                 name = botNames[temp];
-                nameExists = false;
+                nameExists = false; //resets to default value
 
                 for (Player player : playerList.getPlayerlist()) {
                     if (player.getName().equals(name.toUpperCase())) {
-                        nameExists = true;
+                        nameExists = true; //check if name already exists so that name will be unique
                         break;
                     }
                 }
             } while (nameExists);
-            playerList.getPlayerlist().add(new Bot(name.toUpperCase()));
+            playerList.getPlayerlist().add(new Bot(name.toUpperCase())); //Created an instance of Bot with (name) then adds Bot to the playerList
             System.out.println(name + " is added.");
         }
     }
@@ -791,11 +851,10 @@ public class GameMethods {
             do {
                 System.out.println("Please type in your name: ");
                 name = scanner.nextLine().toUpperCase();
-                nameExists = false;
+                nameExists = false; //resets to default value
 
                 for (Player player : playerList.getPlayerlist()) {
-                    if (player.getName().equals(name)) {
-                        nameExists = true;
+                    if (player.getName().equals(name)) { //check if name already exists
                         break;
                     }
                 }
@@ -805,7 +864,7 @@ public class GameMethods {
                 }
             } while (nameExists || name.isEmpty());
 
-            playerList.add(new Human(name));
+            playerList.add(new Human(name)); //Created an instance of Human with (name) then adds Human to the playerList
             i++;
         }
     }
@@ -820,7 +879,7 @@ public class GameMethods {
                 if (answer >= 0 && answer <= 4) {
                     break; // Valid input, exit the loop
                 } else {
-                    System.out.println("Invalid input! Please enter a number between 0 and 4."); //will be repeated desired input is entered
+                    System.out.println("Invalid input! Please enter a number between 0 and 4."); //will be repeated till desired input is entered
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input! Please enter a number between 0 and 4.");
@@ -830,9 +889,9 @@ public class GameMethods {
         if (answer > 0 && answer <= 4) {
             botsPlayers(answer); //this is a method to set up bot players
         } else {
-            System.out.println("OK, so there will be NO bots in this game!");
+            System.out.println("OK, only humans will play this round!");
         }
-        int numberOfHumanPlayers = 4 - answer; //answer will be the number of  human players
+        int numberOfHumanPlayers = 4 - answer; //max player(4) - number of bots = number of human players
         humanPlayers(numberOfHumanPlayers); // method to set up human players
     }
 }
